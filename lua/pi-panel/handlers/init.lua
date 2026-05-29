@@ -1,11 +1,15 @@
--- JSON-RPC handler registry. Tool handlers (open_file, open_diff, ...) are
--- added in later phases; Phase 1 ships only capability negotiation.
+-- JSON-RPC handler registry. Capability negotiation plus the Phase 3 tools
+-- (open_file, get_selection, get_workspace_folders). More land in Phases 4–5.
 
 local M = {}
 
 local PROTOCOL_VERSION = 1
 
-M.registry = {}
+M.registry = {
+  open_file = require("pi-panel.handlers.open_file").handle,
+  get_selection = require("pi-panel.handlers.get_selection").handle,
+  get_workspace_folders = require("pi-panel.handlers.get_workspace_folders").handle,
+}
 
 --- Capability negotiation. Both sides exchange protocol version + tool list;
 --- a mismatch is warned (never rejected) so the protocol can evolve.
@@ -17,8 +21,7 @@ M.registry.initialize = function(params)
       vim.log.levels.WARN)
   end
 
-  -- Tool names this Neovim end can service. Populated as handlers land in
-  -- Phases 3–5; empty for now (the server has no tools wired yet).
+  -- Tool names this Neovim end can service (every registry key but initialize).
   local supported = {}
   for method in pairs(M.registry) do
     if method ~= "initialize" then

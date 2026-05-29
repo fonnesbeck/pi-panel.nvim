@@ -30,7 +30,11 @@ The `pi-nvim-bridge` TypeScript extension ships as part of the Neovim plugin rep
 
 **Build: esbuild-bundle into a single committed `dist/index.js`.** Pi *can* load raw `.ts` via [jiti](https://github.com/unjs/jiti) and pi's `extensions/` loader accepts both `.ts` and `.js`, so no compile is needed for our own code. The reason to bundle is the one runtime dependency — the `ws` WebSocket client. The alternatives (vendoring `node_modules/`, running `npm install` at `setup()`, or hand-rolling an RFC 6455 client over `node:net`) are each worse: the first is ugly, the second adds startup friction, and the third duplicates frame/masking logic in a second language and is error-prone. Bundling produces one self-contained file with no `node_modules` and no per-user install.
 
-esbuild config note: mark the pi-provided packages as `--external` — `typebox`, `@earendil-works/pi-coding-agent`, `@earendil-works/pi-ai`, `@earendil-works/pi-tui`. Pi core bundles these and requires them as `peerDependencies`; bundling copies would break module identity (packages.md). Only `ws` (and any other true third-party dep) gets inlined.
+esbuild config note (revised in Phase 3 against the real pi 0.77 loader): mark only the **type-only** pi packages as `--external` — `@earendil-works/pi-coding-agent`, `@earendil-works/pi-agent-core`, `@earendil-works/pi-ai`, `@earendil-works/pi-tui`. We import these with `import type` only, so esbuild erases them and the `--external` flags are just belt-and-suspenders. **`ws` and `typebox` are both inlined** into the bundle. Two findings forced inlining `typebox` (the original plan kept it external):
+> - Pi loads `-e` extensions through jiti with `tryNative` enabled, which native-`import`s a pre-bundled `.js`. Native import bypasses jiti's peer-dep `alias` map, so a bare `import { Type } from "typebox"` is unresolvable for end users (who only get `dist/index.js`, no `node_modules`). Verified: it fails with `ERR_MODULE_NOT_FOUND`.
+> - typebox 1.x emits **plain JSON Schema** objects (`{ "type": "object", ... }`) with no symbol/`Kind` markers, so there is no module-identity concern — pi's validator consumes our bundled-typebox schema identically.
+>
+> The ESM bundle also needs a `createRequire` banner (`import { createRequire } from 'node:module'; const require = createRequire(import.meta.url)`) so the inlined CJS `ws` can `require()` Node built-ins.
 
 > Optional zero-build path: if the project pins **Node 22+**, use Node's global `WebSocket` instead of `ws`, drop the bundle, and ship plain `.ts`. Pi requires only Node 18+, so this is not the default.
 
@@ -542,7 +546,7 @@ pi-panel.nvim/
 │       ├── package.json          # deps: ws; peerDeps: typebox + @earendil-works/pi-*
 │       ├── package-lock.json
 │       └── dist/
-│           └── index.js          # esbuild bundle (committed); ws inlined, pi pkgs external
+│           └── index.js          # esbuild bundle (committed); ws + typebox inlined, type-only pi pkgs external
 │                                 # launched via `pi -e .../dist/index.js`
 ├── plugin/
 │   └── pi-panel.lua              # Auto-loaded commands
@@ -825,7 +829,7 @@ require("pi-panel").setup({
 
 ```makefile
 deps:        # npm install in extensions/pi-nvim-bridge/
-build:       # esbuild bundle -> dist/index.js (ws inlined; typebox + pi pkgs external)
+build:       # esbuild bundle -> dist/index.js (ws + typebox inlined; type-only pi pkgs external)
 test:        # Run busted + npm test
 lint:        # Run stylua + eslint
 typecheck:   # tsc --noEmit (type-check only; bundling is esbuild's job)

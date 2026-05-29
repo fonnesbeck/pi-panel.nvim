@@ -15,9 +15,10 @@ build:
 typecheck:
 	cd $(EXT_DIR) && npm run typecheck
 
-# Lua test suite (zero-dependency runner under tests/).
+# Test suites: Lua (zero-dependency runner under tests/) + extension (node:test).
 test:
 	nvim --headless -l tests/run.lua
+	cd $(EXT_DIR) && npm test
 
 lint:
 	@command -v stylua >/dev/null 2>&1 && stylua --check lua/ tests/ \
