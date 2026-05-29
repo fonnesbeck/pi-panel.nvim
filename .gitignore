@@ -1,6 +1,6 @@
-# Node (extension dependencies / bundle output, added in later phases)
+# Node (extension dependencies). The esbuild bundle at
+# extensions/pi-nvim-bridge/dist/index.js is intentionally committed.
 node_modules/
-extensions/**/dist/
 
 # Lua / test scratch
 *.tmp
