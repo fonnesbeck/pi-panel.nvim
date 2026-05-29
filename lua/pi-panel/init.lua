@@ -48,6 +48,16 @@ function M.stop()
   started = false
 end
 
+--- Accept the active diff (write the proposal, unblock pi).
+function M.accept()
+  require("pi-panel.diff").accept_current()
+end
+
+--- Reject the active diff (discard the proposal, unblock pi).
+function M.reject()
+  require("pi-panel.diff").reject_current()
+end
+
 --- Print a one-line connection summary via vim.notify.
 function M.status()
   local msg

@@ -1,0 +1,101 @@
+local t = require("support.runner")
+local diff = require("pi-panel.diff")
+local config = require("pi-panel.config")
+
+-- Use in-tab splits (not a new tab) and a long timeout for deterministic tests.
+local function reset()
+  config.setup({ diff_opts = { open_in_new_tab = false, layout = "vertical" } })
+end
+
+t.describe("diff.open + accept", function()
+  t.it("writes the proposed contents to the file and reports FILE_SAVED", function()
+    reset()
+    local tmp = vim.fn.tempname() -- new file (does not exist yet)
+    local got
+    local view = diff.open({ filePath = tmp, newContents = "alpha\nbeta\n" }, function(r)
+      got = r
+    end)
+    diff.accept(view)
+    t.eq(got, "FILE_SAVED")
+    t.eq(vim.fn.readfile(tmp), { "alpha", "beta" }, "file written with proposed contents")
+    os.remove(tmp)
+  end)
+
+  t.it("writes the user-edited right buffer, not the original proposal", function()
+    reset()
+    local tmp = vim.fn.tempname()
+    local got
+    local view = diff.open({ filePath = tmp, newContents = "one\n" }, function(r)
+      got = r
+    end)
+    vim.api.nvim_buf_set_lines(view.new_buf, 0, -1, false, { "edited", "twice" })
+    diff.accept(view)
+    t.eq(got, "FILE_SAVED")
+    t.eq(vim.fn.readfile(tmp), { "edited", "twice" })
+    os.remove(tmp)
+  end)
+
+  t.it("is idempotent: a second accept does not re-fire the result", function()
+    reset()
+    local tmp = vim.fn.tempname()
+    local n = 0
+    local view = diff.open({ filePath = tmp, newContents = "x\n" }, function()
+      n = n + 1
+    end)
+    diff.accept(view)
+    diff.accept(view)
+    t.eq(n, 1)
+    os.remove(tmp)
+  end)
+end)
+
+t.describe("diff.open + reject", function()
+  t.it("reports DIFF_REJECTED and does not write the file", function()
+    reset()
+    local tmp = vim.fn.tempname()
+    local got
+    local view = diff.open({ filePath = tmp, newContents = "nope\n" }, function(r)
+      got = r
+    end)
+    diff.reject(view)
+    t.eq(got, "DIFF_REJECTED")
+    t.eq(vim.fn.filereadable(tmp), 0, "file not created on reject")
+  end)
+end)
+
+t.describe("diff.open original side", function()
+  t.it("shows existing file contents on the left and the proposal on the right", function()
+    reset()
+    local tmp = vim.fn.tempname()
+    vim.fn.writefile({ "old1", "old2" }, tmp)
+    local view = diff.open({ filePath = tmp, newContents = "new1\nnew2\n" }, function() end)
+    t.eq(vim.api.nvim_buf_get_lines(view.orig_buf, 0, -1, false), { "old1", "old2" })
+    t.eq(vim.api.nvim_buf_get_lines(view.new_buf, 0, -1, false), { "new1", "new2" })
+    diff.reject(view)
+    os.remove(tmp)
+  end)
+
+  t.it("uses an empty left side for a brand-new file", function()
+    reset()
+    local tmp = vim.fn.tempname()
+    local view = diff.open({ filePath = tmp, newContents = "fresh\n" }, function() end)
+    t.eq(vim.api.nvim_buf_get_lines(view.orig_buf, 0, -1, false), { "" }, "empty original")
+    diff.reject(view)
+  end)
+end)
+
+t.describe("diff.accept_current / reject_current", function()
+  t.it("accept_current resolves the most recently opened diff", function()
+    reset()
+    local tmp = vim.fn.tempname()
+    local got
+    diff.open({ filePath = tmp, newContents = "z\n" }, function(r)
+      got = r
+    end)
+    t.is_true(diff.is_active(), "a diff is active")
+    diff.accept_current()
+    t.eq(got, "FILE_SAVED")
+    t.eq(diff.is_active(), false, "no diff active after accept")
+    os.remove(tmp)
+  end)
+end)

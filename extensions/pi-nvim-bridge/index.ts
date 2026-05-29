@@ -18,7 +18,7 @@ import { NvimBridge, type WebSocketLike } from "./bridge.ts";
 
 // JSON-RPC method names this extension can call on Neovim (advertised in the
 // initialize handshake; they map 1:1 to the nvim_* tools below).
-const METHODS = ["open_file", "get_selection", "get_workspace_folders"];
+const METHODS = ["open_file", "open_diff", "get_selection", "get_workspace_folders"];
 
 function log(message: string): void {
   console.error(`[pi-nvim-bridge] ${message}`);
@@ -81,6 +81,23 @@ export default function (pi: ExtensionAPI): void {
       ),
     }),
     execute: (_id, params, signal) => call("open_file", params, signal),
+  });
+
+  pi.registerTool({
+    name: "nvim_open_diff",
+    label: "Open Diff in Neovim",
+    description:
+      "Show proposed changes to a file as a diff in Neovim and BLOCK until the " +
+      "user accepts (FILE_SAVED) or rejects (DIFF_REJECTED) them. Use this to let " +
+      "the user review edits before they are written to disk.",
+    parameters: Type.Object({
+      filePath: Type.String({ description: "Absolute path of the file being changed" }),
+      newContents: Type.String({ description: "Full proposed contents of the file" }),
+      oldContents: Type.Optional(
+        Type.String({ description: "Original contents for the left side (defaults to the file on disk)" }),
+      ),
+    }),
+    execute: (_id, params, signal) => call("open_diff", params, signal),
   });
 
   pi.registerTool({

@@ -22,6 +22,8 @@ function M.register()
   cmd("PiStart", "open", { desc = "Start the WebSocket server and launch pi" })
   cmd("PiStop", "stop", { desc = "Stop pi and the WebSocket server" })
   cmd("PiStatus", "status", { desc = "Show pi connection status" })
+  cmd("PiAccept", "accept", { desc = "Accept the current pi diff" })
+  cmd("PiReject", "reject", { desc = "Reject the current pi diff" })
 end
 
 return M

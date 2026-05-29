@@ -7,9 +7,16 @@ local PROTOCOL_VERSION = 1
 
 M.registry = {
   open_file = require("pi-panel.handlers.open_file").handle,
+  open_diff = require("pi-panel.handlers.open_diff").handle,
   get_selection = require("pi-panel.handlers.get_selection").handle,
   get_workspace_folders = require("pi-panel.handlers.get_workspace_folders").handle,
 }
+
+-- `cancel` is a notification (no response): an Esc in pi aborts a blocking
+-- tool. It carries the cancelled request's id in params.id.
+M.registry.cancel = function(params)
+  require("pi-panel.handlers.cancellations").cancel(params.id)
+end
 
 --- Capability negotiation. Both sides exchange protocol version + tool list;
 --- a mismatch is warned (never rejected) so the protocol can evolve.
@@ -21,10 +28,11 @@ M.registry.initialize = function(params)
       vim.log.levels.WARN)
   end
 
-  -- Tool names this Neovim end can service (every registry key but initialize).
+  -- Tool names this Neovim end can service (registry keys minus the internal
+  -- initialize/cancel control methods).
   local supported = {}
   for method in pairs(M.registry) do
-    if method ~= "initialize" then
+    if method ~= "initialize" and method ~= "cancel" then
       supported[#supported + 1] = method
     end
   end

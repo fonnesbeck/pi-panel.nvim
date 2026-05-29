@@ -8070,7 +8070,7 @@ var NvimBridge = class {
 };
 
 // index.ts
-var METHODS = ["open_file", "get_selection", "get_workspace_folders"];
+var METHODS = ["open_file", "open_diff", "get_selection", "get_workspace_folders"];
 function log(message) {
   console.error(`[pi-nvim-bridge] ${message}`);
 }
@@ -8120,6 +8120,19 @@ function index_default(pi) {
       )
     }),
     execute: (_id, params, signal) => call("open_file", params, signal)
+  });
+  pi.registerTool({
+    name: "nvim_open_diff",
+    label: "Open Diff in Neovim",
+    description: "Show proposed changes to a file as a diff in Neovim and BLOCK until the user accepts (FILE_SAVED) or rejects (DIFF_REJECTED) them. Use this to let the user review edits before they are written to disk.",
+    parameters: typebox_exports.Object({
+      filePath: typebox_exports.String({ description: "Absolute path of the file being changed" }),
+      newContents: typebox_exports.String({ description: "Full proposed contents of the file" }),
+      oldContents: typebox_exports.Optional(
+        typebox_exports.String({ description: "Original contents for the left side (defaults to the file on disk)" })
+      )
+    }),
+    execute: (_id, params, signal) => call("open_diff", params, signal)
   });
   pi.registerTool({
     name: "nvim_get_selection",

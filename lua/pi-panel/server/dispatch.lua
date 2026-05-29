@@ -44,7 +44,14 @@ function M.handle(raw, registry, send)
     end
   end
 
-  local ok2, ret = pcall(handler, msg.params or {}, respond)
+  -- Expose the request id to handlers (blocking tools register a cancellation
+  -- under it; see handlers/open_diff.lua and handlers/cancellations.lua).
+  local params = msg.params or {}
+  if id ~= nil and type(params) == "table" then
+    params._requestId = id
+  end
+
+  local ok2, ret = pcall(handler, params, respond)
   if not ok2 then
     if id ~= nil then
       send_error(send, id, -32603, "Internal error: " .. tostring(ret))
