@@ -18,7 +18,18 @@ import { NvimBridge, type WebSocketLike } from "./bridge.ts";
 
 // JSON-RPC method names this extension can call on Neovim (advertised in the
 // initialize handshake; they map 1:1 to the nvim_* tools below).
-const METHODS = ["open_file", "open_diff", "get_selection", "get_workspace_folders"];
+const METHODS = [
+  "open_file",
+  "open_diff",
+  "get_selection",
+  "get_workspace_folders",
+  "get_open_editors",
+  "get_diagnostics",
+  "check_dirty",
+  "save_document",
+  "close_tab",
+  "close_all_diff_tabs",
+];
 
 function log(message: string): void {
   console.error(`[pi-nvim-bridge] ${message}`);
@@ -114,5 +125,62 @@ export default function (pi: ExtensionAPI): void {
     description: "Get the workspace root folders of the connected Neovim editor.",
     parameters: Type.Object({}),
     execute: (_id, _params, signal) => call("get_workspace_folders", {}, signal),
+  });
+
+  pi.registerTool({
+    name: "nvim_get_open_editors",
+    label: "Get Open Editors",
+    description: "List the files currently open in the connected Neovim editor.",
+    parameters: Type.Object({}),
+    execute: (_id, _params, signal) => call("get_open_editors", {}, signal),
+  });
+
+  pi.registerTool({
+    name: "nvim_get_diagnostics",
+    label: "Get Diagnostics",
+    description:
+      "Get LSP diagnostics from Neovim, for one file (filePath) or all open buffers.",
+    parameters: Type.Object({
+      filePath: Type.Optional(Type.String({ description: "Limit to this file (absolute path)" })),
+    }),
+    execute: (_id, params, signal) => call("get_diagnostics", params, signal),
+  });
+
+  pi.registerTool({
+    name: "nvim_check_dirty",
+    label: "Check Unsaved Changes",
+    description: "Check whether a file has unsaved changes in Neovim.",
+    parameters: Type.Object({
+      filePath: Type.Optional(Type.String({ description: "File to check (defaults to the active buffer)" })),
+    }),
+    execute: (_id, params, signal) => call("check_dirty", params, signal),
+  });
+
+  pi.registerTool({
+    name: "nvim_save_document",
+    label: "Save Document",
+    description: "Save a file's buffer to disk in Neovim.",
+    parameters: Type.Object({
+      filePath: Type.String({ description: "Absolute path of the file to save" }),
+    }),
+    execute: (_id, params, signal) => call("save_document", params, signal),
+  });
+
+  pi.registerTool({
+    name: "nvim_close_tab",
+    label: "Close Tab",
+    description: "Close the buffer/tab for a file in Neovim.",
+    parameters: Type.Object({
+      filePath: Type.String({ description: "Absolute path of the file to close" }),
+    }),
+    execute: (_id, params, signal) => call("close_tab", params, signal),
+  });
+
+  pi.registerTool({
+    name: "nvim_close_all_diff_tabs",
+    label: "Close All Diff Tabs",
+    description: "Close every open diff view in Neovim (rejecting any pending review).",
+    parameters: Type.Object({}),
+    execute: (_id, _params, signal) => call("close_all_diff_tabs", {}, signal),
   });
 }

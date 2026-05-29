@@ -156,6 +156,19 @@ function M.is_active()
   return next(active) ~= nil
 end
 
+-- Reject every open diff (so pending open_diff requests resolve) and return the
+-- number closed. Used by the close_all_diff_tabs tool.
+function M.close_all()
+  local views = {}
+  for _, view in pairs(active) do
+    views[#views + 1] = view
+  end
+  for _, view in ipairs(views) do
+    M.reject(view)
+  end
+  return #views
+end
+
 -- Resolve the diff for the current buffer, else the most recently opened one.
 local function current_view()
   return active[vim.api.nvim_get_current_buf()] or last

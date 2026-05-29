@@ -10,6 +10,12 @@ M.registry = {
   open_diff = require("pi-panel.handlers.open_diff").handle,
   get_selection = require("pi-panel.handlers.get_selection").handle,
   get_workspace_folders = require("pi-panel.handlers.get_workspace_folders").handle,
+  get_open_editors = require("pi-panel.handlers.get_open_editors").handle,
+  get_diagnostics = require("pi-panel.handlers.get_diagnostics").handle,
+  check_dirty = require("pi-panel.handlers.check_dirty").handle,
+  save_document = require("pi-panel.handlers.save_document").handle,
+  close_tab = require("pi-panel.handlers.close_tab").handle,
+  close_all_diff_tabs = require("pi-panel.handlers.close_all_diff_tabs").handle,
 }
 
 -- `cancel` is a notification (no response): an Esc in pi aborts a blocking
