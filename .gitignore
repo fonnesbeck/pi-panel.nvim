@@ -1,0 +1,10 @@
+# Node (extension dependencies / bundle output, added in later phases)
+node_modules/
+extensions/**/dist/
+
+# Lua / test scratch
+*.tmp
+*.luacov
+
+# Editor
+.DS_Store
