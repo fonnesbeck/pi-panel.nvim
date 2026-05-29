@@ -24,6 +24,14 @@ function M.register()
   cmd("PiStatus", "status", { desc = "Show pi connection status" })
   cmd("PiAccept", "accept", { desc = "Accept the current pi diff" })
   cmd("PiReject", "reject", { desc = "Reject the current pi diff" })
+
+  vim.api.nvim_create_user_command("PiSend", function()
+    require("pi-panel").send_selection()
+  end, { range = true, desc = "Send the visual selection to pi" })
+
+  vim.api.nvim_create_user_command("PiAdd", function(o)
+    require("pi-panel").add_file(o.args)
+  end, { nargs = "?", complete = "file", desc = "Add a file to pi context (defaults to current)" })
 end
 
 return M

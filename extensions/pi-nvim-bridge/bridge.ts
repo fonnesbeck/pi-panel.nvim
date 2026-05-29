@@ -36,6 +36,8 @@ export interface BridgeOptions {
   /** Defaults to setTimeout; injected in tests to capture reconnect scheduling. */
   schedule?: (fn: () => void, ms: number) => void;
   log?: (message: string) => void;
+  /** Called for inbound JSON-RPC notifications (no id), e.g. selection_changed. */
+  onNotification?: (method: string, params: unknown) => void;
 }
 
 export class NvimBridge {
@@ -118,7 +120,11 @@ export class NvimBridge {
       this.log(`dropping unparseable message: ${raw}`);
       return;
     }
-    if (msg.id == null) return; // notification from Neovim (handled in Phase 5)
+    if (msg.id == null) {
+      // Notification from Neovim (e.g. selection_changed) — no response expected.
+      if (msg.method) this.opts.onNotification?.(msg.method, msg.params);
+      return;
+    }
     const entry = this.pending.get(msg.id);
     if (!entry) return;
     this.pending.delete(msg.id);

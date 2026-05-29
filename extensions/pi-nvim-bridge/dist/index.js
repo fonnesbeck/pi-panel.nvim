@@ -8014,7 +8014,10 @@ var NvimBridge = class {
       this.log(`dropping unparseable message: ${raw}`);
       return;
     }
-    if (msg.id == null) return;
+    if (msg.id == null) {
+      if (msg.method) this.opts.onNotification?.(msg.method, msg.params);
+      return;
+    }
     const entry = this.pending.get(msg.id);
     if (!entry) return;
     this.pending.delete(msg.id);
@@ -8074,6 +8077,7 @@ var METHODS = [
   "open_file",
   "open_diff",
   "get_selection",
+  "get_latest_selection",
   "get_workspace_folders",
   "get_open_editors",
   "get_diagnostics",
@@ -8087,6 +8091,7 @@ function log(message) {
 }
 function index_default(pi) {
   let bridge = null;
+  let latestSelection = null;
   pi.on("session_start", () => {
     const port = process.env.PI_IDE_PORT;
     const auth = process.env.PI_IDE_AUTH;
@@ -8099,7 +8104,12 @@ function index_default(pi) {
       auth,
       supportedTools: METHODS,
       createSocket: (url, headers) => new wrapper_default(url, { headers }),
-      log
+      log,
+      onNotification: (method, params) => {
+        if (method === "selection_changed") {
+          latestSelection = params;
+        }
+      }
     });
     bridge.connect();
     log(`connecting to Neovim on 127.0.0.1:${port}`);
@@ -8151,6 +8161,13 @@ function index_default(pi) {
     description: "Get the current visual selection in the connected Neovim editor.",
     parameters: typebox_exports.Object({}),
     execute: (_id, _params, signal) => call("get_selection", {}, signal)
+  });
+  pi.registerTool({
+    name: "nvim_get_latest_selection",
+    label: "Get Latest Neovim Selection",
+    description: "Get the most recent selection tracked in Neovim, even if the user is no longer selecting.",
+    parameters: typebox_exports.Object({}),
+    execute: (_id, _params, signal) => call("get_latest_selection", {}, signal)
   });
   pi.registerTool({
     name: "nvim_get_workspace_folders",

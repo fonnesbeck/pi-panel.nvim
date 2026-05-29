@@ -58,6 +58,39 @@ function M.reject()
   require("pi-panel.diff").reject_current()
 end
 
+--- Send the current visual selection into pi's terminal as a code reference.
+function M.send_selection()
+  local sel = require("pi-panel.selection").current()
+  if sel.isEmpty then
+    vim.notify("pi-panel: no visual selection to send", vim.log.levels.WARN)
+    return
+  end
+  local ref = ("@%s:%d-%d"):format(
+    vim.fn.fnamemodify(sel.filePath, ":."),
+    sel.selection.start.line,
+    sel.selection["end"].line
+  )
+  local block = ("%s\n```\n%s\n```\n"):format(ref, sel.text)
+  if not require("pi-panel.terminal").send_text(block) then
+    vim.notify("pi-panel: pi terminal is not running", vim.log.levels.WARN)
+  end
+end
+
+--- Send an @file mention into pi's terminal. With no argument, uses the path
+--- under the cursor in a file tree, else the current buffer.
+---@param file? string
+function M.add_file(file)
+  if not file or file == "" then
+    file = require("pi-panel.filetree").current_path() or vim.api.nvim_buf_get_name(0)
+  end
+  if not file or file == "" then
+    return
+  end
+  if not require("pi-panel.terminal").send_text("@" .. vim.fn.fnamemodify(file, ":.") .. " ") then
+    vim.notify("pi-panel: pi terminal is not running", vim.log.levels.WARN)
+  end
+end
+
 --- Print a one-line connection summary via vim.notify.
 function M.status()
   local msg
@@ -86,6 +119,14 @@ function M.setup(opts)
       server.stop()
     end,
   })
+
+  if cfg.track_selection then
+    require("pi-panel.selection").setup(cfg)
+  end
+
+  if cfg.whichkey and cfg.whichkey.enabled then
+    pcall(require("pi-panel.whichkey").register, cfg.whichkey)
+  end
 
   if cfg.auto_start then
     -- Defer so setup() returns quickly and the UI is ready before pi launches.

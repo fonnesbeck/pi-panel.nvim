@@ -27,6 +27,11 @@ function M.is_open()
   return state ~= nil and state.win ~= nil and vim.api.nvim_win_is_valid(state.win)
 end
 
+--- The terminal job channel (for chansend), or nil if not running.
+function M.channel()
+  return state and state.job or nil
+end
+
 local function buf_valid()
   return state ~= nil and vim.api.nvim_buf_is_valid(state.buf)
 end

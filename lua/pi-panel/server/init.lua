@@ -58,6 +58,24 @@ function M.stop()
   state = nil
 end
 
+--- Broadcast a JSON-RPC notification (no id) to every open client. No-op when
+--- the server isn't running. Used for selection_changed / at_mentioned events.
+---@param method string
+---@param params table
+function M.broadcast(method, params)
+  if not state then
+    return
+  end
+  local msg = vim.json.encode({ jsonrpc = "2.0", method = method, params = params })
+  for client in pairs(state.server.clients) do
+    if client.state == "open" then
+      pcall(function()
+        client:send_text(msg)
+      end)
+    end
+  end
+end
+
 function M.is_running()
   return state ~= nil
 end

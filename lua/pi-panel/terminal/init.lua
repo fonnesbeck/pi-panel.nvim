@@ -92,4 +92,17 @@ function M.close()
   end
 end
 
+--- Write text into the running pi terminal's stdin (e.g. a selection from
+--- :PiSend). Returns true if it was sent.
+---@param text string
+---@return boolean
+function M.send_text(text)
+  local chan = active and active.channel and active.channel()
+  if not chan then
+    return false
+  end
+  pcall(vim.fn.chansend, chan, text)
+  return true
+end
+
 return M

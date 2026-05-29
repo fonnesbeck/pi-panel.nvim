@@ -22,6 +22,7 @@ const METHODS = [
   "open_file",
   "open_diff",
   "get_selection",
+  "get_latest_selection",
   "get_workspace_folders",
   "get_open_editors",
   "get_diagnostics",
@@ -37,6 +38,9 @@ function log(message: string): void {
 
 export default function (pi: ExtensionAPI): void {
   let bridge: NvimBridge | null = null;
+  // Latest selection pushed by Neovim's selection tracking (informational; the
+  // nvim_get_latest_selection tool reads the authoritative copy from Neovim).
+  let latestSelection: unknown = null;
 
   pi.on("session_start", () => {
     const port = process.env.PI_IDE_PORT;
@@ -52,6 +56,11 @@ export default function (pi: ExtensionAPI): void {
       createSocket: (url, headers) =>
         new WebSocket(url, { headers }) as unknown as WebSocketLike,
       log,
+      onNotification: (method, params) => {
+        if (method === "selection_changed") {
+          latestSelection = params;
+        }
+      },
     });
     bridge.connect();
     log(`connecting to Neovim on 127.0.0.1:${port}`);
@@ -117,6 +126,15 @@ export default function (pi: ExtensionAPI): void {
     description: "Get the current visual selection in the connected Neovim editor.",
     parameters: Type.Object({}),
     execute: (_id, _params, signal) => call("get_selection", {}, signal),
+  });
+
+  pi.registerTool({
+    name: "nvim_get_latest_selection",
+    label: "Get Latest Neovim Selection",
+    description:
+      "Get the most recent selection tracked in Neovim, even if the user is no longer selecting.",
+    parameters: Type.Object({}),
+    execute: (_id, _params, signal) => call("get_latest_selection", {}, signal),
   });
 
   pi.registerTool({

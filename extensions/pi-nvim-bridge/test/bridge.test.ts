@@ -128,6 +128,31 @@ test("a user-initiated close does not schedule a reconnect", () => {
   assert.equal(h.scheduled.length, 0);
 });
 
+test("dispatches inbound notifications (no id) to onNotification", () => {
+  let received: { method: string; params: unknown } | null = null;
+  let socket: FakeSocket | null = null;
+  const bridge = new NvimBridge({
+    port: "1",
+    auth: "t",
+    supportedTools: [],
+    createSocket: (_url, headers) => {
+      socket = new FakeSocket(headers);
+      return socket;
+    },
+    schedule: () => {},
+    onNotification: (method, params) => {
+      received = { method, params };
+    },
+  });
+  bridge.connect();
+  socket!.emit("open");
+  socket!.emit(
+    "message",
+    JSON.stringify({ jsonrpc: "2.0", method: "selection_changed", params: { text: "hi" } }),
+  );
+  assert.deepEqual(received, { method: "selection_changed", params: { text: "hi" } });
+});
+
 test("aborting a request sends a cancel notification and rejects", async () => {
   const h = makeBridge();
   h.bridge.connect();

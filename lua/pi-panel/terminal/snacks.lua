@@ -28,6 +28,14 @@ function M.is_open()
     and vim.api.nvim_win_is_valid(term.win)
 end
 
+--- The terminal job channel (for chansend), or nil if not running.
+function M.channel()
+  if term and term.buf and vim.api.nvim_buf_is_valid(term.buf) then
+    return vim.b[term.buf].terminal_job_id
+  end
+  return nil
+end
+
 ---@param opts { cmd: string[], env: table, cfg: table, on_exit?: fun(code: integer) }
 function M.open(opts)
   local Snacks = require("snacks")

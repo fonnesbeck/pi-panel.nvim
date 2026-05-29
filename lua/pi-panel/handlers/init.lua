@@ -9,6 +9,7 @@ M.registry = {
   open_file = require("pi-panel.handlers.open_file").handle,
   open_diff = require("pi-panel.handlers.open_diff").handle,
   get_selection = require("pi-panel.handlers.get_selection").handle,
+  get_latest_selection = require("pi-panel.handlers.get_latest_selection").handle,
   get_workspace_folders = require("pi-panel.handlers.get_workspace_folders").handle,
   get_open_editors = require("pi-panel.handlers.get_open_editors").handle,
   get_diagnostics = require("pi-panel.handlers.get_diagnostics").handle,
