@@ -8099,10 +8099,12 @@ function index_default(pi) {
       log("PI_IDE_PORT/PI_IDE_AUTH not set; this pi was not launched by pi-panel.nvim");
       return;
     }
+    const maxReconnectDelay = Number(process.env.PI_IDE_RECONNECT_MAX_DELAY);
     bridge = new NvimBridge({
       port,
       auth,
       supportedTools: METHODS,
+      maxReconnectDelay: Number.isFinite(maxReconnectDelay) && maxReconnectDelay > 0 ? maxReconnectDelay : void 0,
       createSocket: (url, headers) => new wrapper_default(url, { headers }),
       log,
       onNotification: (method, params) => {

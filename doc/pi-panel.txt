@@ -42,7 +42,6 @@ Calling setup() with no table uses the defaults in |pi-panel-config|. With
 Defaults: >lua
     {
       auto_start = true,
-      port_range = { min = 10000, max = 65535 },
       pi_cmd = nil,
       env = {},
       terminal = {
@@ -62,7 +61,6 @@ Defaults: >lua
         keep_terminal_focus = false,
         timeout = 300,
       },
-      log_level = "info",
       whichkey = { enabled = true, leader = "p" },
     }
 <
@@ -77,6 +75,8 @@ Defaults: >lua
 :PiStart        Start the WebSocket server and launch pi.
                                                                       *:PiStop*
 :PiStop         Stop pi and the WebSocket server.
+                                                                 *:PiReconnect*
+:PiReconnect    Restart the server and pi to force reconnection.
                                                                     *:PiStatus*
 :PiStatus       Show connection status.
                                                                       *:PiSend*

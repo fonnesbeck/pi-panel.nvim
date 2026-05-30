@@ -7,9 +7,6 @@ M.defaults = {
   -- Auto-start the WebSocket server and launch pi on setup().
   auto_start = true,
 
-  -- Port range for the WebSocket server (0 lets the OS pick within bind()).
-  port_range = { min = 10000, max = 65535 },
-
   -- Pi binary (nil = resolve "pi" from PATH).
   pi_cmd = nil,
 
@@ -17,7 +14,7 @@ M.defaults = {
   env = {},
 
   terminal = {
-    provider = "auto", -- "auto" | "snacks" | "native" | "external"
+    provider = "auto", -- "auto" | "snacks" | "native"  ("external" is future)
     split_side = "right", -- "left" | "right"
     split_width_percentage = 0.30,
     auto_close = true,
@@ -37,22 +34,22 @@ M.defaults = {
     timeout = 300,
   },
 
-  log_level = "info", -- "trace" | "debug" | "info" | "warn" | "error"
-
   whichkey = {
     enabled = true,
     leader = "p",
   },
 }
 
-local PROVIDERS = { auto = true, snacks = true, native = true, external = true }
+-- "external" (tmux/kitty/wezterm) is documented as future and has no provider
+-- module yet, so it is intentionally NOT accepted here — selecting it fails at
+-- setup() rather than crashing later in terminal/init.lua.
+local PROVIDERS = { auto = true, snacks = true, native = true }
 local SPLIT_SIDES = { left = true, right = true }
-local LOG_LEVELS = { trace = true, debug = true, info = true, warn = true, error = true }
 
 local function validate(cfg)
   local term = cfg.terminal
   if not PROVIDERS[term.provider] then
-    error(("pi-panel: invalid terminal.provider %q (expected auto|snacks|native|external)")
+    error(("pi-panel: invalid terminal.provider %q (expected auto|snacks|native)")
       :format(tostring(term.provider)))
   end
   if not SPLIT_SIDES[term.split_side] then
@@ -63,10 +60,6 @@ local function validate(cfg)
   if type(pct) ~= "number" or pct <= 0 or pct >= 1 then
     error(("pi-panel: invalid terminal.split_width_percentage %s (expected a number in (0,1))")
       :format(tostring(pct)))
-  end
-  if not LOG_LEVELS[cfg.log_level] then
-    error(("pi-panel: invalid log_level %q (expected trace|debug|info|warn|error)")
-      :format(tostring(cfg.log_level)))
   end
 end
 

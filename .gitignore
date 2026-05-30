@@ -5,8 +5,12 @@ node_modules/
 # Planning / process docs — kept locally, not tracked
 /PLAN.md
 /REVIEW.md
+/IMPLEMENTATION_REVIEW.md
 /DECISION_LOG.md
 /plans/
+
+# Generated Neovim help tags (produced by :helptags)
+/doc/tags
 
 # Lua / test scratch
 *.tmp

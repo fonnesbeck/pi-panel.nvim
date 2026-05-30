@@ -1,6 +1,6 @@
 EXT_DIR := extensions/pi-nvim-bridge
 
-.PHONY: deps build typecheck test lint format clean
+.PHONY: deps build typecheck test lint format audit clean
 
 # Install the extension's npm deps (contributor-side; end users get the
 # committed dist/index.js bundle).
@@ -23,6 +23,13 @@ test:
 lint:
 	@command -v stylua >/dev/null 2>&1 && stylua --check lua/ tests/ \
 		|| echo "stylua not installed; skipping Lua lint"
+	@if ls $(EXT_DIR)/eslint.config.* $(EXT_DIR)/.eslintrc* >/dev/null 2>&1; then \
+		cd $(EXT_DIR) && npx --no-install eslint . ; \
+	else echo "eslint not configured; skipping TypeScript lint"; fi
+
+# Scan the extension's dependencies for known vulnerabilities (also run in CI).
+audit:
+	cd $(EXT_DIR) && npm audit --audit-level=moderate
 
 format:
 	@command -v stylua >/dev/null 2>&1 && stylua lua/ tests/ \

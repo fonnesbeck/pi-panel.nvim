@@ -20,6 +20,7 @@ t.describe("pi-panel.setup", function()
     t.is_true(cmd_exists("PiStart"), ":PiStart defined")
     t.is_true(cmd_exists("PiStop"), ":PiStop defined")
     t.is_true(cmd_exists("PiStatus"), ":PiStatus defined")
+    t.is_true(cmd_exists("PiReconnect"), ":PiReconnect defined")
   end)
 
   t.it("propagates invalid config as an error", function()

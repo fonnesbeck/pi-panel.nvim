@@ -42,6 +42,7 @@ end
 ---@return table view
 function M.open(params, on_result)
   local cfg = config.get().diff_opts
+  local start_win = vim.api.nvim_get_current_win()
   local orig_lines = original_lines(params)
   local new_lines = to_lines(params.newContents)
 
@@ -95,6 +96,12 @@ function M.open(params, on_result)
       M.accept(view)
     end,
   })
+
+  -- By default the user lands in the proposed buffer to review it; with
+  -- keep_terminal_focus, leave focus on the window they came from (the panel).
+  if cfg.keep_terminal_focus and vim.api.nvim_win_is_valid(start_win) then
+    vim.api.nvim_set_current_win(start_win)
+  end
 
   return view
 end

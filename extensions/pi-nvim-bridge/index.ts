@@ -49,10 +49,14 @@ export default function (pi: ExtensionAPI): void {
       log("PI_IDE_PORT/PI_IDE_AUTH not set; this pi was not launched by pi-panel.nvim");
       return;
     }
+    const maxReconnectDelay = Number(process.env.PI_IDE_RECONNECT_MAX_DELAY);
     bridge = new NvimBridge({
       port,
       auth,
       supportedTools: METHODS,
+      maxReconnectDelay: Number.isFinite(maxReconnectDelay) && maxReconnectDelay > 0
+        ? maxReconnectDelay
+        : undefined,
       createSocket: (url, headers) =>
         new WebSocket(url, { headers }) as unknown as WebSocketLike,
       log,

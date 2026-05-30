@@ -5,6 +5,17 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Changed
+
+- `:PiReconnect` restarts the server + pi to recover a wedged connection.
+- `reconnect_max_delay`, `connection_timeout`, and `diff_opts.keep_terminal_focus`
+  are now wired (previously declared but unused). `reconnect_max_delay` is passed
+  to the extension via `PI_IDE_RECONNECT_MAX_DELAY`.
+- Removed the unused `port_range` and `log_level` config fields, and dropped the
+  not-yet-implemented `external` terminal provider from accepted values (it now
+  fails validation at `setup()` instead of crashing on open).
+- Makefile gained an `audit` target and a guarded `eslint` lint step.
+
 ### Added
 
 - Pure-Lua WebSocket server (`vim.uv`, RFC 6455) bound to localhost, with an

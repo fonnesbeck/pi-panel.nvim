@@ -31,6 +31,16 @@ t.describe("terminal.build_env", function()
     t.eq(env.FOO, "bar", "user var passed through")
     t.eq(env.PI_IDE_PORT, "10", "discovery var wins over user override")
   end)
+
+  t.it("passes reconnect_max_delay through PI_IDE_RECONNECT_MAX_DELAY when set", function()
+    local env = terminal.build_env({ env = {}, reconnect_max_delay = 5000 }, { port = 1, token = "t" })
+    t.eq(env.PI_IDE_RECONNECT_MAX_DELAY, "5000")
+  end)
+
+  t.it("omits PI_IDE_RECONNECT_MAX_DELAY when reconnect_max_delay is absent", function()
+    local env = terminal.build_env({ env = {} }, { port = 1, token = "t" })
+    t.is_nil(env.PI_IDE_RECONNECT_MAX_DELAY)
+  end)
 end)
 
 t.describe("terminal.select_provider", function()

@@ -5,9 +5,6 @@ pi's full TUI in a side panel, with a WebSocket side channel that lets pi call
 back into the editor — open files, review diffs, read your selection, fetch
 diagnostics, and more.
 
-Feature parity with [claudecode.nvim](https://github.com/coder/claudecode.nvim),
-adapted for pi.
-
 ## How it works
 
 - pi runs with its normal TUI inside a Neovim terminal panel.
@@ -17,12 +14,6 @@ adapted for pi.
   registers tools that delegate to Neovim over JSON-RPC 2.0.
 - Discovery is via `PI_IDE_PORT` / `PI_IDE_AUTH` environment variables that
   Neovim sets when it launches pi with `pi -e <bundled-extension>`.
-
-```
-Neovim ──hosts──▶ WebSocket server ◀──connects── pi-nvim-bridge (inside pi)
-  ▲                                                      │
-  └──────────── JSON-RPC tool calls (open_file, … ) ◀────┘
-```
 
 ## Requirements
 
@@ -53,7 +44,6 @@ With [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 require("pi-panel").setup({
   auto_start = true,              -- start the server + launch pi on setup
-  port_range = { min = 10000, max = 65535 },
   pi_cmd = nil,                   -- nil => "pi" from PATH
   env = {},                       -- extra env vars for the pi process
 
@@ -78,7 +68,6 @@ require("pi-panel").setup({
     timeout = 300,                -- seconds before a diff auto-rejects
   },
 
-  log_level = "info",
   whichkey = { enabled = true, leader = "p" },
 })
 ```
@@ -91,6 +80,7 @@ require("pi-panel").setup({
 | `:PiFocus` | Focus the panel (open if needed) |
 | `:PiStart` | Start the server and launch pi |
 | `:PiStop` | Stop pi and the server |
+| `:PiReconnect` | Restart the server + pi to force reconnection |
 | `:PiStatus` | Show connection status |
 | `:PiSend` | Send the visual selection into pi's prompt |
 | `:PiAdd [file]` | Send an `@file` mention (defaults to the current buffer) |

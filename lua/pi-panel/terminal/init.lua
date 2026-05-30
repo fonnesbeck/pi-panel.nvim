@@ -23,6 +23,9 @@ function M.build_env(cfg, info)
   env.PI_IDE_PORT = tostring(info.port)
   env.PI_IDE_AUTH = info.token
   env.PI_IDE_LOCKFILE = lockfile.path(info.port)
+  if cfg.reconnect_max_delay then
+    env.PI_IDE_RECONNECT_MAX_DELAY = tostring(cfg.reconnect_max_delay)
+  end
   return env
 end
 

@@ -21,6 +21,19 @@ function M.open()
     started = false
   end)
   started = true
+
+  -- Warn if pi never connects to the side channel within connection_timeout.
+  local timeout = cfg.connection_timeout
+  if type(timeout) == "number" and timeout > 0 then
+    vim.defer_fn(function()
+      if server.is_running() and not server.has_client() then
+        vim.notify(
+          ("pi-panel: no connection from pi after %dms (try :PiReconnect)"):format(timeout),
+          vim.log.levels.WARN
+        )
+      end
+    end, timeout)
+  end
 end
 
 --- Toggle panel visibility (opening + launching pi on first use).
@@ -46,6 +59,14 @@ function M.stop()
   terminal.close()
   server.stop()
   started = false
+end
+
+--- Force a clean reconnection: tear everything down and relaunch with a fresh
+--- server port/token and a new pi process. Recovers from a wedged connection
+--- without restarting Neovim.
+function M.reconnect()
+  M.stop()
+  M.open()
 end
 
 --- Accept the active diff (write the proposal, unblock pi).
