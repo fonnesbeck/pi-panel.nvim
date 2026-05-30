@@ -1,0 +1,134 @@
+*pi-panel.txt*                  Deep pi integration for Neovim
+
+==============================================================================
+CONTENTS                                                     *pi-panel-contents*
+
+  1. Introduction ........................... |pi-panel-introduction|
+  2. Requirements ........................... |pi-panel-requirements|
+  3. Setup .................................. |pi-panel-setup|
+  4. Configuration .......................... |pi-panel-config|
+  5. Commands ............................... |pi-panel-commands|
+  6. Mappings ............................... |pi-panel-mappings|
+  7. Statusline ............................. |pi-panel-statusline|
+  8. Tools .................................. |pi-panel-tools|
+  9. Architecture ........................... |pi-panel-architecture|
+
+==============================================================================
+1. INTRODUCTION                                          *pi-panel-introduction*
+
+pi-panel.nvim runs the pi coding agent's TUI in a Neovim side panel and opens a
+localhost WebSocket side channel so pi can call back into the editor: open
+files, show diffs, read the selection, list diagnostics, and more.
+
+==============================================================================
+2. REQUIREMENTS                                          *pi-panel-requirements*
+
+- Neovim 0.10+ (uses |vim.uv|)
+- pi on $PATH (Node.js 18+)
+- snacks.nvim (optional; native terminal fallback otherwise)
+
+==============================================================================
+3. SETUP                                                        *pi-panel-setup*
+
+>lua
+    require("pi-panel").setup({})
+<
+Calling setup() with no table uses the defaults in |pi-panel-config|. With
+`auto_start = true` (default) the server starts and pi launches immediately.
+
+==============================================================================
+4. CONFIGURATION                                               *pi-panel-config*
+
+Defaults: >lua
+    {
+      auto_start = true,
+      port_range = { min = 10000, max = 65535 },
+      pi_cmd = nil,
+      env = {},
+      terminal = {
+        provider = "auto",   -- "auto" | "snacks" | "native"
+        split_side = "right",
+        split_width_percentage = 0.30,
+        auto_close = true,
+        snacks_win_opts = {},
+      },
+      track_selection = true,
+      visual_demotion_delay_ms = 50,
+      connection_timeout = 10000,
+      reconnect_max_delay = 30000,
+      diff_opts = {
+        layout = "vertical",
+        open_in_new_tab = false,
+        keep_terminal_focus = false,
+        timeout = 300,
+      },
+      log_level = "info",
+      whichkey = { enabled = true, leader = "p" },
+    }
+<
+==============================================================================
+5. COMMANDS                                                  *pi-panel-commands*
+
+                                                                          *:Pi*
+:Pi             Toggle the pi panel.
+                                                                     *:PiFocus*
+:PiFocus        Focus the panel (open if needed).
+                                                                     *:PiStart*
+:PiStart        Start the WebSocket server and launch pi.
+                                                                      *:PiStop*
+:PiStop         Stop pi and the WebSocket server.
+                                                                    *:PiStatus*
+:PiStatus       Show connection status.
+                                                                      *:PiSend*
+:PiSend         Send the visual selection into pi's prompt.
+                                                                       *:PiAdd*
+:PiAdd [file]   Send an @file mention (defaults to the current buffer).
+                                                                    *:PiAccept*
+:PiAccept       Accept the current diff.
+                                                                    *:PiReject*
+:PiReject       Reject the current diff.
+
+==============================================================================
+6. MAPPINGS                                                  *pi-panel-mappings*
+
+With which-key.nvim installed, a <leader>p group is registered:
+
+  <leader>pp   Toggle panel        <leader>pa   Accept diff
+  <leader>pf   Focus panel         <leader>pr   Reject diff
+  <leader>ps   Send selection      <leader>pb   Add current buffer
+  <leader>px   Stop pi
+
+==============================================================================
+7. STATUSLINE                                              *pi-panel-statusline*
+
+>lua
+    require("pi-panel.status").statusline()
+<
+Returns "pi: off", "pi: waiting", or "pi: connected".
+
+==============================================================================
+8. TOOLS                                                        *pi-panel-tools*
+
+Tools pi can call (delegated to Neovim over the side channel):
+
+  nvim_open_file               nvim_get_diagnostics
+  nvim_open_diff (blocking)    nvim_check_dirty
+  nvim_get_selection           nvim_save_document
+  nvim_get_latest_selection    nvim_close_tab
+  nvim_get_workspace_folders   nvim_close_all_diff_tabs
+  nvim_get_open_editors
+
+nvim_open_diff blocks until you accept (|:PiAccept|, <leader>pa, or :w) or
+reject (|:PiReject| or <leader>pr). Esc in pi cancels; an unreviewed diff
+auto-rejects after diff_opts.timeout seconds.
+
+==============================================================================
+9. ARCHITECTURE                                          *pi-panel-architecture*
+
+Neovim hosts a pure-Lua WebSocket server (127.0.0.1 only) and writes a lock
+file to ~/.pi/ide/[port].lock. It launches pi with `pi -e <bundled extension>`
+and the PI_IDE_PORT / PI_IDE_AUTH env vars. The pi-nvim-bridge extension
+connects back and exposes the tools above via JSON-RPC 2.0. See the docs/adr/
+directory for design decisions.
+
+vim:tw=78:ts=8:ft=help:norl:
