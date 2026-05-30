@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/header.png" alt="pi-panel.nvim — pi's TUI bridged to Neovim" width="600">
+</div>
+
 # pi-panel.nvim
 
 Deep [pi](https://github.com/earendil-works/pi) integration for Neovim: run
