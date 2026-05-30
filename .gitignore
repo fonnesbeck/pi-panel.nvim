@@ -2,6 +2,12 @@
 # extensions/pi-nvim-bridge/dist/index.js is intentionally committed.
 node_modules/
 
+# Planning / process docs — kept locally, not tracked
+/PLAN.md
+/REVIEW.md
+/DECISION_LOG.md
+/plans/
+
 # Lua / test scratch
 *.tmp
 *.luacov
