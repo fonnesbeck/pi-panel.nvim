@@ -4,7 +4,9 @@ local dispatch = require("pi-panel.server.dispatch")
 -- Capture responses that dispatch wants to send over the wire.
 local function capture()
   local sent = {}
-  return sent, function(str) sent[#sent + 1] = vim.json.decode(str) end
+  return sent, function(str)
+    sent[#sent + 1] = vim.json.decode(str)
+  end
 end
 
 local function req(tbl)
@@ -36,7 +38,11 @@ t.describe("dispatch.handle", function()
 
   t.it("does not respond to a notification (no id)", function()
     local called = false
-    local registry = { ping = function() called = true end }
+    local registry = {
+      ping = function()
+        called = true
+      end,
+    }
     local sent, send = capture()
     dispatch.handle(req({ jsonrpc = "2.0", method = "ping", params = {} }), registry, send)
     t.is_true(called, "handler ran")
@@ -63,7 +69,11 @@ t.describe("dispatch.handle", function()
   end)
 
   t.it("maps a raised error to internal error -32603", function()
-    local registry = { explode = function() error("unexpected") end }
+    local registry = {
+      explode = function()
+        error("unexpected")
+      end,
+    }
     local sent, send = capture()
     dispatch.handle(req({ jsonrpc = "2.0", id = "6", method = "explode", params = {} }), registry, send)
     t.eq(sent[1].error.code, -32603)
@@ -91,9 +101,15 @@ t.describe("initialize capability negotiation", function()
   t.it("responds with protocolVersion 1 and a supportedTools list", function()
     local sent, send = capture()
     dispatch.handle(
-      req({ jsonrpc = "2.0", id = "init-1", method = "initialize", params = { protocolVersion = 1, supportedTools = {} } }),
+      req({
+        jsonrpc = "2.0",
+        id = "init-1",
+        method = "initialize",
+        params = { protocolVersion = 1, supportedTools = {} },
+      }),
       handlers.registry,
-      send)
+      send
+    )
     t.eq(sent[1].result.protocolVersion, 1)
     t.truthy(type(sent[1].result.supportedTools) == "table", "supportedTools is a list")
   end)

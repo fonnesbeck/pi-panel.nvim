@@ -24,10 +24,7 @@ t.describe("terminal.build_env", function()
   end)
 
   t.it("merges user-supplied env without clobbering the discovery vars", function()
-    local env = terminal.build_env(
-      { env = { FOO = "bar", PI_IDE_PORT = "ignored" } },
-      { port = 10, token = "t" }
-    )
+    local env = terminal.build_env({ env = { FOO = "bar", PI_IDE_PORT = "ignored" } }, { port = 10, token = "t" })
     t.eq(env.FOO, "bar", "user var passed through")
     t.eq(env.PI_IDE_PORT, "10", "discovery var wins over user override")
   end)

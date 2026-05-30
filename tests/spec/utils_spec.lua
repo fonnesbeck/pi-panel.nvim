@@ -11,9 +11,6 @@ end)
 
 t.describe("utils.extension_path", function()
   t.it("points at the committed esbuild bundle under extensions/", function()
-    t.eq(
-      utils.extension_path(),
-      utils.plugin_root() .. "/extensions/pi-nvim-bridge/dist/index.js"
-    )
+    t.eq(utils.extension_path(), utils.plugin_root() .. "/extensions/pi-nvim-bridge/dist/index.js")
   end)
 end)

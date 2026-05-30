@@ -42,11 +42,15 @@ function M.decode(data)
   local pos = 3
 
   if len == 126 then
-    if n < pos + 1 then return nil end
+    if n < pos + 1 then
+      return nil
+    end
     len = data:byte(pos) * 256 + data:byte(pos + 1)
     pos = pos + 2
   elseif len == 127 then
-    if n < pos + 7 then return nil end
+    if n < pos + 7 then
+      return nil
+    end
     len = 0
     for i = 0, 7 do
       len = len * 256 + data:byte(pos + i)
@@ -56,7 +60,9 @@ function M.decode(data)
 
   local key
   if masked then
-    if n < pos + 3 then return nil end
+    if n < pos + 3 then
+      return nil
+    end
     key = data:sub(pos, pos + 3)
     pos = pos + 4
   end

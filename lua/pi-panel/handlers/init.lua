@@ -30,9 +30,12 @@ end
 M.registry.initialize = function(params)
   if params.protocolVersion ~= PROTOCOL_VERSION then
     vim.notify(
-      ("pi-panel: protocol version mismatch (peer=%s, neovim=%d)")
-        :format(tostring(params.protocolVersion), PROTOCOL_VERSION),
-      vim.log.levels.WARN)
+      ("pi-panel: protocol version mismatch (peer=%s, neovim=%d)"):format(
+        tostring(params.protocolVersion),
+        PROTOCOL_VERSION
+      ),
+      vim.log.levels.WARN
+    )
   end
 
   -- Tool names this Neovim end can service (registry keys minus the internal

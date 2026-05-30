@@ -14,7 +14,10 @@ local function mask_frame(opcode, payload, fin)
   else
     local lb = {}
     local rem = len
-    for i = 8, 1, -1 do lb[i] = string.char(rem % 256); rem = math.floor(rem / 256) end
+    for i = 8, 1, -1 do
+      lb[i] = string.char(rem % 256)
+      rem = math.floor(rem / 256)
+    end
     header = string.char(b0, 0x80 + 127) .. table.concat(lb)
   end
   local key = string.char(0x37, 0xfa, 0x21, 0x3d)
@@ -92,10 +95,10 @@ t.describe("frame.encode", function()
 
   t.it("uses 16-bit extended length at the 126-byte boundary", function()
     local out = frame.encode(frame.BINARY, string.rep("y", 126))
-    t.eq(out:byte(1), 0x82)        -- FIN + binary
-    t.eq(out:byte(2), 126)         -- extended-length marker
-    t.eq(out:byte(3), 0)           -- length high byte
-    t.eq(out:byte(4), 126)         -- length low byte
+    t.eq(out:byte(1), 0x82) -- FIN + binary
+    t.eq(out:byte(2), 126) -- extended-length marker
+    t.eq(out:byte(3), 0) -- length high byte
+    t.eq(out:byte(4), 126) -- length low byte
     t.eq(#out, 4 + 126)
   end)
 

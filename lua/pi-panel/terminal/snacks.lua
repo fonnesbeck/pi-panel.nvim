@@ -22,10 +22,7 @@ local function build_opts(opts)
 end
 
 function M.is_open()
-  return term ~= nil
-    and term:valid()
-    and term.win ~= nil
-    and vim.api.nvim_win_is_valid(term.win)
+  return term ~= nil and term:valid() and term.win ~= nil and vim.api.nvim_win_is_valid(term.win)
 end
 
 --- The terminal job channel (for chansend), or nil if not running.

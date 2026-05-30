@@ -47,19 +47,14 @@ function M.base64_encode(data)
 end
 
 local function be32(x)
-  return string.char(
-    band(rshift(x, 24), 0xff),
-    band(rshift(x, 16), 0xff),
-    band(rshift(x, 8), 0xff),
-    band(x, 0xff))
+  return string.char(band(rshift(x, 24), 0xff), band(rshift(x, 16), 0xff), band(rshift(x, 8), 0xff), band(x, 0xff))
 end
 
 --- SHA-1 of a byte string (FIPS 180), returning the raw 20-byte digest.
 ---@param message string
 ---@return string
 function M.sha1(message)
-  local h0, h1, h2, h3, h4 =
-    0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0
+  local h0, h1, h2, h3, h4 = 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0
 
   local ml = #message * 8 -- message length in bits (fits in a double for our sizes)
 
@@ -84,7 +79,8 @@ function M.sha1(message)
         bit.lshift(message:byte(p), 24),
         bit.lshift(message:byte(p + 1), 16),
         bit.lshift(message:byte(p + 2), 8),
-        message:byte(p + 3))
+        message:byte(p + 3)
+      )
     end
     for i = 16, 79 do
       w[i] = rol(bxor(w[i - 3], w[i - 8], w[i - 14], w[i - 16]), 1)

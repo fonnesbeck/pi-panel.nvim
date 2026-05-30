@@ -49,8 +49,7 @@ function M.parse_request(raw)
 end
 
 local function error_response(code, status)
-  return ("HTTP/1.1 %d %s\r\nConnection: close\r\nContent-Length: 0\r\n\r\n")
-    :format(code, status)
+  return ("HTTP/1.1 %d %s\r\nConnection: close\r\nContent-Length: 0\r\n\r\n"):format(code, status)
 end
 
 --- Handle a complete handshake request.

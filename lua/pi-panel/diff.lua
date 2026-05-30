@@ -128,9 +128,7 @@ function M.accept(view)
     return
   end
   view.done = true
-  local lines = vim.api.nvim_buf_is_valid(view.new_buf)
-      and vim.api.nvim_buf_get_lines(view.new_buf, 0, -1, false)
-    or {}
+  local lines = vim.api.nvim_buf_is_valid(view.new_buf) and vim.api.nvim_buf_get_lines(view.new_buf, 0, -1, false) or {}
   vim.fn.mkdir(vim.fn.fnamemodify(view.filePath, ":h"), "p")
   vim.fn.writefile(lines, view.filePath)
   teardown(view)

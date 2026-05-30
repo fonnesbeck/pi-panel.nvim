@@ -6,8 +6,12 @@ local ws = require("support.ws")
 -- A fake transport capturing everything the client would write to the socket.
 local function fake()
   local sink = { written = "", closed = false }
-  function sink.write(data) sink.written = sink.written .. data end
-  function sink.close() sink.closed = true end
+  function sink.write(data)
+    sink.written = sink.written .. data
+  end
+  function sink.close()
+    sink.closed = true
+  end
   return sink
 end
 
@@ -25,7 +29,9 @@ local function written_frames(sink)
   local frames, buf = {}, sink.written
   while true do
     local f, rest = frame.decode(buf)
-    if not f then break end
+    if not f then
+      break
+    end
     frames[#frames + 1] = f
     buf = rest
   end
@@ -39,7 +45,7 @@ t.describe("Client handshake", function()
     local req = ws.upgrade_request("secret")
     c:feed(req:sub(1, 20)) -- partial: no response yet
     t.eq(sink.written, "")
-    c:feed(req:sub(21))    -- remainder completes the header block
+    c:feed(req:sub(21)) -- remainder completes the header block
     t.truthy(sink.written:find("HTTP/1.1 101", 1, true), "101 sent")
     t.eq(c.state, "open")
   end)
@@ -65,7 +71,9 @@ t.describe("Client message handling", function()
 
   t.it("dispatches a JSON-RPC request frame and writes a response frame", function()
     local c, sink = open_client({
-      echo = function(params) return { content = { { type = "text", text = params.msg } } } end,
+      echo = function(params)
+        return { content = { { type = "text", text = params.msg } } }
+      end,
     })
     local request = vim.json.encode({ jsonrpc = "2.0", id = "1", method = "echo", params = { msg = "yo" } })
     c:feed(ws.mask_frame(frame.TEXT, request))
@@ -97,13 +105,17 @@ t.describe("Client message handling", function()
     local seen
     local c = (function()
       local sink = fake()
-      local cl = new_client(sink, { collect = function(params) seen = params.parts end })
+      local cl = new_client(sink, {
+        collect = function(params)
+          seen = params.parts
+        end,
+      })
       cl:feed(ws.upgrade_request("secret"))
       return cl
     end)()
     local msg = vim.json.encode({ jsonrpc = "2.0", method = "collect", params = { parts = "abcdef" } })
     local half = math.floor(#msg / 2)
-    c:feed(ws.mask_frame(frame.TEXT, msg:sub(1, half), false))   -- fin=false
+    c:feed(ws.mask_frame(frame.TEXT, msg:sub(1, half), false)) -- fin=false
     c:feed(ws.mask_frame(frame.CONTINUATION, msg:sub(half + 1), true)) -- final fragment
     t.eq(seen, "abcdef")
   end)

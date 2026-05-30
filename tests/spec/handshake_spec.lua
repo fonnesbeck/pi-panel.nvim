@@ -22,8 +22,7 @@ local VALID = {
 t.describe("handshake.compute_accept", function()
   -- RFC 6455 section 1.3 worked example
   t.it("matches the RFC 6455 test vector", function()
-    t.eq(handshake.compute_accept("dGhlIHNhbXBsZSBub25jZQ=="),
-      "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=")
+    t.eq(handshake.compute_accept("dGhlIHNhbXBsZSBub25jZQ=="), "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=")
   end)
 end)
 

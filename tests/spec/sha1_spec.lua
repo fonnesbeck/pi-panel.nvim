@@ -3,7 +3,9 @@ local utils = require("pi-panel.server.utils")
 
 -- sha1 returns a raw 20-byte digest; convert to lowercase hex for comparison.
 local function hex(raw)
-  return (raw:gsub(".", function(c) return string.format("%02x", c:byte()) end))
+  return (raw:gsub(".", function(c)
+    return string.format("%02x", c:byte())
+  end))
 end
 
 t.describe("sha1", function()

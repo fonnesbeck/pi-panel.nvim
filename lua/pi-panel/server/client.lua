@@ -13,9 +13,9 @@ Client.__index = Client
 ---@param opts { write: fun(data:string), close: fun(), expected_token: string, registry: table }
 function Client.new(opts)
   return setmetatable({
-    buffer = "",            -- unparsed bytes (handshake text, then frame bytes)
-    state = "handshaking",  -- handshaking | open | closed
-    msg = "",               -- reassembly buffer for fragmented messages
+    buffer = "", -- unparsed bytes (handshake text, then frame bytes)
+    state = "handshaking", -- handshaking | open | closed
+    msg = "", -- reassembly buffer for fragmented messages
     write = opts.write,
     close = opts.close,
     expected_token = opts.expected_token,

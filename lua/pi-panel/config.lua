@@ -49,17 +49,14 @@ local SPLIT_SIDES = { left = true, right = true }
 local function validate(cfg)
   local term = cfg.terminal
   if not PROVIDERS[term.provider] then
-    error(("pi-panel: invalid terminal.provider %q (expected auto|snacks|native)")
-      :format(tostring(term.provider)))
+    error(("pi-panel: invalid terminal.provider %q (expected auto|snacks|native)"):format(tostring(term.provider)))
   end
   if not SPLIT_SIDES[term.split_side] then
-    error(("pi-panel: invalid terminal.split_side %q (expected left|right)")
-      :format(tostring(term.split_side)))
+    error(("pi-panel: invalid terminal.split_side %q (expected left|right)"):format(tostring(term.split_side)))
   end
   local pct = term.split_width_percentage
   if type(pct) ~= "number" or pct <= 0 or pct >= 1 then
-    error(("pi-panel: invalid terminal.split_width_percentage %s (expected a number in (0,1))")
-      :format(tostring(pct)))
+    error(("pi-panel: invalid terminal.split_width_percentage %s (expected a number in (0,1))"):format(tostring(pct)))
   end
 end
 

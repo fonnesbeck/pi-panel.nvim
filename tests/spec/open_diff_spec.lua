@@ -5,12 +5,9 @@ local config = require("pi-panel.config")
 
 local function open(req_id, params)
   local captured
-  handlers.registry.open_diff(
-    vim.tbl_extend("force", { _requestId = req_id }, params),
-    function(r)
-      captured = r
-    end
-  )
+  handlers.registry.open_diff(vim.tbl_extend("force", { _requestId = req_id }, params), function(r)
+    captured = r
+  end)
   -- the handler schedules the diff open; wait for it to appear
   vim.wait(500, function()
     return diff.is_active()

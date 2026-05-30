@@ -32,21 +32,28 @@ local function pretty(v)
 end
 
 local function deep_equal(a, b)
-  if type(a) ~= type(b) then return false end
-  if type(a) ~= "table" then return a == b end
+  if type(a) ~= type(b) then
+    return false
+  end
+  if type(a) ~= "table" then
+    return a == b
+  end
   for k, v in pairs(a) do
-    if not deep_equal(v, b[k]) then return false end
+    if not deep_equal(v, b[k]) then
+      return false
+    end
   end
   for k in pairs(b) do
-    if a[k] == nil then return false end
+    if a[k] == nil then
+      return false
+    end
   end
   return true
 end
 
 function M.eq(actual, expected, msg)
   if not deep_equal(actual, expected) then
-    fail((msg and (msg .. ": ") or "")
-      .. "expected " .. pretty(expected) .. ", got " .. pretty(actual))
+    fail((msg and (msg .. ": ") or "") .. "expected " .. pretty(expected) .. ", got " .. pretty(actual))
   end
 end
 
@@ -57,22 +64,30 @@ function M.ne(actual, unexpected, msg)
 end
 
 function M.is_true(v, msg)
-  if v ~= true then fail((msg and (msg .. ": ") or "") .. "expected true, got " .. pretty(v)) end
+  if v ~= true then
+    fail((msg and (msg .. ": ") or "") .. "expected true, got " .. pretty(v))
+  end
 end
 
 function M.is_nil(v, msg)
-  if v ~= nil then fail((msg and (msg .. ": ") or "") .. "expected nil, got " .. pretty(v)) end
+  if v ~= nil then
+    fail((msg and (msg .. ": ") or "") .. "expected nil, got " .. pretty(v))
+  end
 end
 
 function M.truthy(v, msg)
-  if not v then fail((msg and (msg .. ": ") or "") .. "expected truthy, got " .. pretty(v)) end
+  if not v then
+    fail((msg and (msg .. ": ") or "") .. "expected truthy, got " .. pretty(v))
+  end
 end
 
 -- Run `fn` and assert it raises an error whose message contains `pattern`
 -- (plain substring match). Returns the error message.
 function M.error_contains(fn, pattern, msg)
   local ok, err = pcall(fn)
-  if ok then fail((msg and (msg .. ": ") or "") .. "expected error containing " .. pretty(pattern) .. ", but no error raised") end
+  if ok then
+    fail((msg and (msg .. ": ") or "") .. "expected error containing " .. pretty(pattern) .. ", but no error raised")
+  end
   local text = type(err) == "table" and err.message or tostring(err)
   if not string.find(text, pattern, 1, true) then
     fail((msg and (msg .. ": ") or "") .. "expected error containing " .. pretty(pattern) .. ", got " .. pretty(text))

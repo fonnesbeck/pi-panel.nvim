@@ -25,7 +25,9 @@ for _, path in ipairs(entries) do
     if not ok then
       -- Surface a load error as a failing test rather than aborting the run.
       runner.describe(name .. " (load error)", function()
-        runner.it("loads", function() error(err, 0) end)
+        runner.it("loads", function()
+          error(err, 0)
+        end)
       end)
     end
   end
