@@ -3,17 +3,19 @@
 
 local M = {}
 
---- A short connection-state string: "pi: off" | "pi: waiting" | "pi: connected".
+--- A short connection-state string, prefixed with the active agent name:
+--- "pi: off" | "pi: waiting" | "pi: connected" (or "omp: …" under variant "omp").
 ---@return string
 function M.statusline()
   local server = require("pi-panel.server")
+  local name = require("pi-panel.config").get().display or "pi"
   if not server.is_running() then
-    return "pi: off"
+    return name .. ": off"
   end
   if not server.has_client() then
-    return "pi: waiting"
+    return name .. ": waiting"
   end
-  return "pi: connected"
+  return name .. ": connected"
 end
 
 return M

@@ -24,7 +24,7 @@ files, show diffs, read the selection, list diagnostics, and more.
 2. REQUIREMENTS                                          *pi-panel-requirements*
 
 - Neovim 0.10+ (uses |vim.uv|)
-- pi on $PATH (Node.js 18+)
+- pi (or oh-my-pi `omp`) on $PATH (Node.js 18+); see |pi-panel-omp|
 - snacks.nvim (optional; native terminal fallback otherwise)
 
 ==============================================================================
@@ -42,7 +42,8 @@ Calling setup() with no table uses the defaults in |pi-panel-config|. With
 Defaults: >lua
     {
       auto_start = true,
-      pi_cmd = nil,
+      variant = "pi",   -- "pi" | "omp"; selects the binary + ~/.<v>/ide lock dir
+      pi_cmd = nil,     -- nil => the variant's binary from $PATH; set to override
       env = {},
       terminal = {
         provider = "auto",   -- "auto" | "snacks" | "native"
@@ -64,6 +65,18 @@ Defaults: >lua
       whichkey = { enabled = true, leader = "p" },
     }
 <
+                                                                  *pi-panel-omp*
+oh-my-pi (omp) ~
+
+oh-my-pi (`omp`) is a fork of pi. Drive it instead of pi with: >lua
+    require("pi-panel").setup({ variant = "omp" })
+<
+The default is `variant = "pi"`, so omp stays out of the way unless requested.
+With `variant = "omp"` the panel launches `omp`, discovery lock files live under
+`~/.omp/ide` (pi uses `~/.pi/ide`), and status strings name the active agent
+(e.g. `omp: connected`). Set `pi_cmd` to override the binary path. The commands
+(|:Pi|) and mappings (|pi-panel-mappings|) are the same for both variants.
+
 ==============================================================================
 5. COMMANDS                                                  *pi-panel-commands*
 
@@ -104,7 +117,8 @@ With which-key.nvim installed, a <leader>p group is registered:
 >lua
     require("pi-panel.status").statusline()
 <
-Returns "pi: off", "pi: waiting", or "pi: connected".
+Returns "pi: off", "pi: waiting", or "pi: connected". The prefix reflects the
+active agent, so it reads "omp: ..." when `variant = "omp"`.
 
 ==============================================================================
 8. TOOLS                                                        *pi-panel-tools*

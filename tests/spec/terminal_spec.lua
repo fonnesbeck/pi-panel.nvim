@@ -4,14 +4,26 @@ local utils = require("pi-panel.utils")
 local lockfile = require("pi-panel.lockfile")
 
 t.describe("terminal.build_cmd", function()
+  -- build_cmd reads the resolved cfg.cmd that config.setup() fills in; the
+  -- variant/pi_cmd precedence itself is covered in config_spec.
   t.it("defaults to `pi` from PATH and loads the bundled extension via -e", function()
-    local cmd = terminal.build_cmd({ pi_cmd = nil })
+    local cmd = terminal.build_cmd({ cmd = "pi" })
     t.eq(cmd, { "pi", "-e", utils.extension_path() })
   end)
 
-  t.it("honours an explicit pi_cmd path", function()
-    local cmd = terminal.build_cmd({ pi_cmd = "/opt/pi/bin/pi" })
+  t.it("falls back to `pi` when no resolved cmd is present", function()
+    local cmd = terminal.build_cmd({})
+    t.eq(cmd, { "pi", "-e", utils.extension_path() })
+  end)
+
+  t.it("uses the resolved cmd verbatim (e.g. an explicit path)", function()
+    local cmd = terminal.build_cmd({ cmd = "/opt/pi/bin/pi" })
     t.eq(cmd, { "/opt/pi/bin/pi", "-e", utils.extension_path() })
+  end)
+
+  t.it("launches the omp binary when the variant resolved to omp", function()
+    local cmd = terminal.build_cmd({ cmd = "omp" })
+    t.eq(cmd, { "omp", "-e", utils.extension_path() })
   end)
 end)
 

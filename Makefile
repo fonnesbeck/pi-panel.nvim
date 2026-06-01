@@ -1,6 +1,6 @@
 EXT_DIR := extensions/pi-nvim-bridge
 
-.PHONY: deps build typecheck test lint format audit clean
+.PHONY: deps build typecheck test test-omp lint format audit clean
 
 # Install the extension's npm deps (contributor-side; end users get the
 # committed dist/index.js bundle).
@@ -19,6 +19,11 @@ typecheck:
 test:
 	nvim --headless -l tests/run.lua
 	cd $(EXT_DIR) && npm test
+
+# Gated end-to-end check: the committed bundle connects under the real `omp`
+# binary. Requires omp installed + authenticated; skipped without the env flag.
+test-omp:
+	RUN_OMP_INTEGRATION=1 tests/support/omp_integration.sh
 
 lint:
 	@command -v stylua >/dev/null 2>&1 && stylua --check lua/ tests/ \

@@ -22,7 +22,9 @@ diagnostics, and more.
 ## Requirements
 
 - Neovim **0.10+** (`vim.uv`)
-- [pi](https://github.com/earendil-works/pi) on your `PATH` (Node.js 18+)
+- [pi](https://github.com/earendil-works/pi) — or [oh-my-pi
+  (`omp`)](https://github.com/oh-my-pi/oh-my-pi) — on your `PATH` (Node.js 18+).
+  See [Using oh-my-pi (omp)](#using-oh-my-pi-omp).
 - [snacks.nvim](https://github.com/folke/snacks.nvim) (optional; a native
   terminal fallback is used when it's absent)
 
@@ -47,9 +49,10 @@ With [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 require("pi-panel").setup({
-  auto_start = true,              -- start the server + launch pi on setup
-  pi_cmd = nil,                   -- nil => "pi" from PATH
-  env = {},                       -- extra env vars for the pi process
+  auto_start = true,              -- start the server + launch the agent on setup
+  variant = "pi",                 -- "pi" | "omp"; picks the binary + its ~/.<v>/ide lock dir
+  pi_cmd = nil,                   -- nil => use the variant's binary from PATH; set to override
+  env = {},                       -- extra env vars for the agent process
 
   terminal = {
     provider = "auto",            -- "auto" | "snacks" | "native"
@@ -75,6 +78,25 @@ require("pi-panel").setup({
   whichkey = { enabled = true, leader = "p" },
 })
 ```
+
+### Using oh-my-pi (omp)
+
+[oh-my-pi](https://github.com/oh-my-pi/oh-my-pi) (`omp`) is a fork of pi. To
+drive it instead of pi, set the variant:
+
+```lua
+require("pi-panel").setup({ variant = "omp" })
+```
+
+That's the whole change. The plugin defaults to `variant = "pi"`, so omp stays
+out of the way unless you ask for it. With `variant = "omp"`:
+
+- the panel launches `omp` (override the binary with `pi_cmd = "/path/to/omp"`),
+- discovery lock files live under `~/.omp/ide` (pi uses `~/.pi/ide`),
+- status/statusline strings name the active agent (e.g. `omp: connected`).
+
+The commands (`:Pi*`) and which-key keymaps (`<leader>p`) are the same for both
+variants — the panel only ever drives one agent at a time.
 
 ## Commands
 
@@ -113,7 +135,8 @@ When [which-key](https://github.com/folke/which-key.nvim) is installed, a
 { function() return require("pi-panel.status").statusline() end }
 ```
 
-Shows `pi: off` / `pi: waiting` / `pi: connected`.
+Shows `pi: off` / `pi: waiting` / `pi: connected` — the prefix reflects the
+active agent, so it reads `omp: …` when `variant = "omp"`.
 
 ## Tools available to pi
 

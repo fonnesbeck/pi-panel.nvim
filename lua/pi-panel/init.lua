@@ -22,13 +22,13 @@ function M.open()
   end)
   started = true
 
-  -- Warn if pi never connects to the side channel within connection_timeout.
+  -- Warn if the agent never connects to the side channel within connection_timeout.
   local timeout = cfg.connection_timeout
   if type(timeout) == "number" and timeout > 0 then
     vim.defer_fn(function()
       if server.is_running() and not server.has_client() then
         vim.notify(
-          ("pi-panel: no connection from pi after %dms (try :PiReconnect)"):format(timeout),
+          ("pi-panel: no connection from %s after %dms (try :PiReconnect)"):format(cfg.display or "pi", timeout),
           vim.log.levels.WARN
         )
       end
@@ -114,13 +114,14 @@ end
 
 --- Print a one-line connection summary via vim.notify.
 function M.status()
+  local name = config.get().display or "pi"
   local msg
   if not server.is_running() then
     msg = "pi-panel: server off"
   elseif server.has_client() then
-    msg = ("pi-panel: connected (port %d)"):format(server.port())
+    msg = ("pi-panel: %s connected (port %d)"):format(name, server.port())
   else
-    msg = ("pi-panel: waiting for pi (port %d)"):format(server.port())
+    msg = ("pi-panel: waiting for %s (port %d)"):format(name, server.port())
   end
   vim.notify(msg, vim.log.levels.INFO)
 end
@@ -130,6 +131,8 @@ end
 ---@return table M
 function M.setup(opts)
   local cfg = config.setup(opts)
+  -- Point discovery lock files at the active variant's home (~/.pi/ide or ~/.omp/ide).
+  require("pi-panel.lockfile").set_dir(vim.fn.expand(cfg.lockfile_dir))
   require("pi-panel.commands").register()
 
   local group = vim.api.nvim_create_augroup("PiPanel", { clear = true })

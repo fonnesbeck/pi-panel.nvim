@@ -7,7 +7,12 @@ M.defaults = {
   -- Auto-start the WebSocket server and launch pi on setup().
   auto_start = true,
 
-  -- Pi binary (nil = resolve "pi" from PATH).
+  -- Which agent to drive: "pi" | "omp". Selects the default binary and the
+  -- ~/.<variant>/ide lock directory. See M.variants below.
+  variant = "pi",
+
+  -- Override the agent binary (nil = use the variant's binary from PATH).
+  -- Wins over the variant's default cmd; useful for a non-PATH install.
   pi_cmd = nil,
 
   -- Extra environment variables for the pi process.
@@ -40,6 +45,21 @@ M.defaults = {
   },
 }
 
+-- Known agent variants. Each maps to the default binary, the discovery lock
+-- directory (a pi-panel convention under the agent's home), and a display name
+-- used in user-facing status/connection messages.
+M.variants = {
+  pi = { cmd = "pi", lockfile_dir = "~/.pi/ide", display = "pi" },
+  omp = { cmd = "omp", lockfile_dir = "~/.omp/ide", display = "oh-my-pi" },
+}
+
+--- Resolve the active variant spec for a config, defaulting to "pi".
+---@param cfg table
+---@return { cmd: string, lockfile_dir: string, display: string }
+function M.variant(cfg)
+  return M.variants[cfg.variant] or M.variants.pi
+end
+
 -- "external" (tmux/kitty/wezterm) is documented as future and has no provider
 -- module yet, so it is intentionally NOT accepted here — selecting it fails at
 -- setup() rather than crashing later in terminal/init.lua.
@@ -47,6 +67,9 @@ local PROVIDERS = { auto = true, snacks = true, native = true }
 local SPLIT_SIDES = { left = true, right = true }
 
 local function validate(cfg)
+  if not M.variants[cfg.variant] then
+    error(("pi-panel: invalid variant %q (expected pi|omp)"):format(tostring(cfg.variant)))
+  end
   local term = cfg.terminal
   if not PROVIDERS[term.provider] then
     error(("pi-panel: invalid terminal.provider %q (expected auto|snacks|native)"):format(tostring(term.provider)))
@@ -69,6 +92,13 @@ local current = nil
 function M.setup(opts)
   local merged = vim.tbl_deep_extend("force", vim.deepcopy(M.defaults), opts or {})
   validate(merged)
+  -- Resolve the variant once here so downstream modules read plain fields off
+  -- cfg (cmd / lockfile_dir / display) without reaching back into this module.
+  -- pi_cmd, when set, overrides the variant's default binary.
+  local v = M.variant(merged)
+  merged.cmd = merged.pi_cmd or v.cmd
+  merged.lockfile_dir = v.lockfile_dir
+  merged.display = v.display
   current = merged
   return merged
 end

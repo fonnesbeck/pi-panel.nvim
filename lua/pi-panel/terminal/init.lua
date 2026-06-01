@@ -6,11 +6,13 @@ local lockfile = require("pi-panel.lockfile")
 
 local M = {}
 
---- Build the argv that launches pi with the pi-nvim-bridge extension.
+--- Build the argv that launches the agent with the pi-nvim-bridge extension.
+--- `cfg.cmd` is the resolved binary (variant default, or pi_cmd override);
+--- config.setup() fills it in, so this stays a pure function of its argument.
 ---@param cfg table the active config
 ---@return string[]
 function M.build_cmd(cfg)
-  return { cfg.pi_cmd or "pi", "-e", utils.extension_path() }
+  return { cfg.cmd or "pi", "-e", utils.extension_path() }
 end
 
 --- Build the environment for the pi process: user env plus the PI_IDE_*
