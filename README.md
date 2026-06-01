@@ -9,6 +9,10 @@ pi's full TUI in a side panel, with a WebSocket side channel that lets pi call
 back into the editor — open files, review diffs, read your selection, fetch
 diagnostics, and more.
 
+<div align="center">
+  <img src="assets/screenshot.png" alt="pi-panel.nvim: editing a buffer with the pi/omp TUI in a side panel" width="800">
+</div>
+
 ## How it works
 
 - pi runs with its normal TUI inside a Neovim terminal panel.
