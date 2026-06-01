@@ -88,7 +88,7 @@ drive it instead of pi, set the variant:
 require("pi-panel").setup({ variant = "omp" })
 ```
 
-That's the whole change. The plugin defaults to `variant = "pi"`, so omp stays
+The plugin defaults to `variant = "pi"`, so omp stays
 out of the way unless you ask for it. With `variant = "omp"`:
 
 - the panel launches `omp` (override the binary with `pi_cmd = "/path/to/omp"`),
