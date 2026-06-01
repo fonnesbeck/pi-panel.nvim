@@ -8072,6 +8072,38 @@ var NvimBridge = class {
   }
 };
 
+// bun-socket.ts
+function isBun() {
+  return typeof globalThis.Bun !== "undefined" || typeof process !== "undefined" && Boolean(process.versions?.bun);
+}
+function createBunSocket(url, headers) {
+  const NativeWebSocket = globalThis.WebSocket;
+  const ws = new NativeWebSocket(url, { headers });
+  return {
+    get readyState() {
+      return ws.readyState;
+    },
+    send(data) {
+      ws.send(data);
+    },
+    close() {
+      ws.close();
+    },
+    on(event, cb) {
+      if (event === "message") {
+        ws.addEventListener("message", (ev) => cb(ev.data));
+      } else if (event === "error") {
+        ws.addEventListener(
+          "error",
+          (ev) => cb(ev instanceof Error ? ev : new Error(ev?.message ?? "websocket error"))
+        );
+      } else {
+        ws.addEventListener(event, () => cb());
+      }
+    }
+  };
+}
+
 // index.ts
 var METHODS = [
   "open_file",
@@ -8105,7 +8137,10 @@ function index_default(pi) {
       auth,
       supportedTools: METHODS,
       maxReconnectDelay: Number.isFinite(maxReconnectDelay) && maxReconnectDelay > 0 ? maxReconnectDelay : void 0,
-      createSocket: (url, headers) => new wrapper_default(url, { headers }),
+      // Bun's node:http breaks the `ws` client handshake (Unexpected server
+      // response: 101), so under Bun (omp) use Bun's native WebSocket; `ws`
+      // stays for Node (pi). See bun-socket.ts.
+      createSocket: (url, headers) => isBun() ? createBunSocket(url, headers) : new wrapper_default(url, { headers }),
       log,
       onNotification: (method, params) => {
         if (method === "selection_changed") {

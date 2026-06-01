@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Fixed
+
+- The `variant = "omp"` (oh-my-pi) path couldn't connect: omp runs on Bun, whose
+  `node:http` breaks the bundled `ws` client handshake (`Unexpected server
+  response: 101`). The bridge now uses Bun's native WebSocket under Bun and keeps
+  `ws` for Node (pi). The omp integration check (`make test-omp`) now asserts a
+  completed handshake (the server received the `initialize` frame) instead of mere
+  TCP accept, which was a false positive.
+
 ### Changed
 
 - `:PiReconnect` restarts the server + pi to recover a wedged connection.
@@ -40,3 +49,7 @@ All notable changes to this project are documented here. The format is based on
   integration (nvim-tree / oil / neo-tree). (Phase 5)
 - Documentation (README, `:help pi-panel`, ADRs), CI workflow, and an
   end-to-end integration test suite. (Phase 5)
+- `variant` config option (`"pi"` | `"omp"`, default `"pi"`) to drive oh-my-pi
+  (`omp`) instead of pi: selects the binary and its `~/.<variant>/ide` lock dir,
+  and names the active agent in status/statusline messages. `pi_cmd` overrides the
+  binary. Gated `make test-omp` integration check.

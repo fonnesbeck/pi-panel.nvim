@@ -15,6 +15,7 @@ import { Type } from "typebox";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import type { AgentToolResult } from "@earendil-works/pi-agent-core";
 import { NvimBridge, type WebSocketLike } from "./bridge.ts";
+import { createBunSocket, isBun } from "./bun-socket.ts";
 
 // JSON-RPC method names this extension can call on Neovim (advertised in the
 // initialize handshake; they map 1:1 to the nvim_* tools below).
@@ -57,8 +58,13 @@ export default function (pi: ExtensionAPI): void {
       maxReconnectDelay: Number.isFinite(maxReconnectDelay) && maxReconnectDelay > 0
         ? maxReconnectDelay
         : undefined,
+      // Bun's node:http breaks the `ws` client handshake (Unexpected server
+      // response: 101), so under Bun (omp) use Bun's native WebSocket; `ws`
+      // stays for Node (pi). See bun-socket.ts.
       createSocket: (url, headers) =>
-        new WebSocket(url, { headers }) as unknown as WebSocketLike,
+        isBun()
+          ? createBunSocket(url, headers)
+          : (new WebSocket(url, { headers }) as unknown as WebSocketLike),
       log,
       onNotification: (method, params) => {
         if (method === "selection_changed") {
