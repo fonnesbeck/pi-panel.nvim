@@ -2,8 +2,6 @@
   <img src="assets/header.png" alt="pi-panel.nvim — pi's TUI bridged to Neovim" width="600">
 </div>
 
-# pi-panel.nvim
-
 Deep [pi](https://github.com/earendil-works/pi) integration for Neovim: run
 pi's full TUI in a side panel, with a WebSocket side channel that lets pi call
 back into the editor — open files, review diffs, read your selection, fetch
